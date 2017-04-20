@@ -1,0 +1,101 @@
+<!DOCTYPE>
+<html>
+<head>
+	<meta charset="utf-8"/> 
+	<title>刷新</title>
+	<meta content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" name="viewport" />
+	<style type="text/css">
+		*{padding:0;margin:0;}
+		.shuaxin{ hegiht: 0px;}
+		.jiazai{height:70px;}
+	</style>
+</head>
+<body>
+	<div class="top" style="height:70px; width: 70px; background-color: green;"></div>
+	<div class="loog" style="height:5000px; width: 30px; background-color: red;"></div>
+	<h1 class="jiazai">下拉加载更多</h1>
+	<script type="text/javascript">
+		//touches事件的判定触摸点
+		function fnTouches(e){
+			if(!e.touches){
+				return e.touches = e.originalEvent.touches;
+			}
+		};
+		var _me ={}; 
+		_me.flag = true;//只执行一次
+		//touchStart 
+		function fnTouchstart(e){
+			_me._start = Number(e.touches[0].clientY);
+			_me.touchTop = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+		};
+		//touchMove
+		function fnTouchMove(e){
+			_me._move = Number(e.touches[0].clientY);
+			_me.y = _me._move - _me._start;
+			if(_me.y < 0){
+				_me.move = 'down';
+			}else if(_me.y > 0){
+				_me.move = 'up';
+			}
+			
+			if(_me.move == 'up' && _me.touchTop <=0){
+				//插入数据
+				if(_me.flag){
+					document.querySelector('body').insertAdjacentHTML('afterBegin','<h1 class="shuaxin" style="height:0px;">刷新</h1>');
+					_me.doc = document.querySelector('.shuaxin');
+					_me.doc.style.height =  '70px';
+					fnTransition(_me.doc, 1000);
+					_me.flag = false;
+					
+				}
+					
+			}
+			var _absY = Math.abs(_me.y);			
+		};
+		//touchEnd
+		function fnTouchEnd(e){
+				fnTransition(_me.doc, 1000);
+				_me.doc.style.marginTop = '-70px';
+				_me.doc.addEventListener('transitionend', function(){
+					_me.doc.parentNode.removeChild(_me.doc);//去掉自己本元素
+					_me.flag = true;
+				}, false);	
+		}
+		//拉动的效果css过度
+		function fnTransition(dom, num){
+		
+		console.log('all ' + num +'ms');
+			dom.style.transition = 'all ' + num +'ms';
+			dom.style.WebkitTransition = 'all ' + num +'ms';
+		}
+		document.addEventListener('scroll',function(){
+			var scrollTop = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
+			var clentHeight = document.body.clientHeight || document.documentElement.clientHeight;
+			console.log(document.body.offsetHeight, window.innerHeight, clentHeight, scrollTop)
+			if( document.body.offsetHeight < clentHeight + scrollTop + 35){//下拉的时候
+				document.querySelector('.jiazai').insertAdjacentHTML('beforeBegin', '<div class="loog" style="margin-top:50px; height:5000px; width: 30px; background-color: red;"></div>');
+			}
+		},false);
+		
+		/*console.log(window.innerHeight);//568屏幕的高度
+		console.log(document.body.offsetHeight);*/
+		var oLoog = document.querySelector('.loog');
+		var oTop = document.querySelector('.top');
+		
+		document.addEventListener('touchstart',function(e){
+			fnTouches(e);
+			fnTouchstart(e);
+		},false);
+		document.addEventListener('touchmove',function(e){
+			fnTouches(e);
+			fnTouchMove(e)
+
+		},false);
+		document.addEventListener('touchend',function(e){
+			fnTouches(e);
+			fnTouchEnd(e);
+		},false);
+		
+	</script>
+</body>
+</html>
