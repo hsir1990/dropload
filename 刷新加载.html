@@ -38,40 +38,50 @@
 				_me.move = 'up';
 			}
 			
+			var _absY = Math.abs(_me.y);
 			if(_me.move == 'up' && _me.touchTop <=0){
+				 e.preventDefault();//防止刷新之后收不回页面
 				//插入数据
+				if(_absY >= 30){
+						_me.doc.style.height = _absY + 'px';
+					 }
 				if(_me.flag){
-					document.querySelector('body').insertAdjacentHTML('afterBegin','<h1 class="shuaxin" style="height:0px;">刷新</h1>');
+					document.querySelector('body').insertAdjacentHTML('afterBegin','<h1 class="shuaxin" style="height:0px;">111</h1>');
 					_me.doc = document.querySelector('.shuaxin');
-					_me.doc.style.height =  '70px';
-					fnTransition(_me.doc, 1000);
-					_me.flag = false;
-					
-				}
-					
+					_me.doc.style.height =  '30px';
+					_me.flag = false;	
+				}		
 			}
-			var _absY = Math.abs(_me.y);			
+						
 		};
 		//touchEnd
 		function fnTouchEnd(e){
-				fnTransition(_me.doc, 1000);
-				_me.doc.style.marginTop = '-70px';
-				_me.doc.addEventListener('transitionend', function(){
-					_me.doc.parentNode.removeChild(_me.doc);//去掉自己本元素
-					_me.flag = true;
-				}, false);	
+			if(document.querySelector('.shuaxin')){
+				fnTransition(_me.doc, 300);
+				_me.doc.style.height = '25px'
+
+				var events = 'transitionend || webkitTransitionEnd'
+				if(_me.doc.parentNode){
+					_me.doc.addEventListener('webkitTransitionEnd', function(){
+						//debugger;
+						_me.doc.parentNode.removeChild(_me.doc);//去掉自己本元素
+						_me.flag = true;
+					}, false);
+				}
+					
+			}		
 		}
 		//拉动的效果css过度
 		function fnTransition(dom, num){
-		
-		console.log('all ' + num +'ms');
-			dom.style.transition = 'all ' + num +'ms';
-			dom.style.WebkitTransition = 'all ' + num +'ms';
+			try{
+				dom.style.transition = 'all ' + num +'ms';
+			}catch(e){
+				dom.style.WebkitTransition = 'all ' + num +'ms';
+			}	
 		}
-		document.addEventListener('scroll',function(){
+		document.addEventListener('scroll',function(e){
 			var scrollTop = document.documentElement.scrollTop || window.pageYOffset || document.body.scrollTop;
 			var clentHeight = document.body.clientHeight || document.documentElement.clientHeight;
-			console.log(document.body.offsetHeight, window.innerHeight, clentHeight, scrollTop)
 			if( document.body.offsetHeight < clentHeight + scrollTop + 35){//下拉的时候
 				document.querySelector('.jiazai').insertAdjacentHTML('beforeBegin', '<div class="loog" style="margin-top:50px; height:5000px; width: 30px; background-color: red;"></div>');
 			}
@@ -86,16 +96,26 @@
 			fnTouches(e);
 			fnTouchstart(e);
 		},false);
-		document.addEventListener('touchmove',function(e){
+		window.addEventListener('touchmove',function(e){
 			fnTouches(e);
-			fnTouchMove(e)
-
+			fnTouchMove(e);
 		},false);
 		document.addEventListener('touchend',function(e){
 			fnTouches(e);
 			fnTouchEnd(e);
 		},false);
-		
+		document.removeEventListener('touchstart', function(e){
+			e.preventDefault();
+		},false);
+		document.removeEventListener('touchmove', function(e){
+			e.preventDefault();
+		}, false);
+		document.removeEventListener('touchend', function(e){
+			e.preventDefault();
+		}, false);
+		document.removeEventListener('scroll', function(e){
+			e.preventDefault();
+		}, false);
 	</script>
 </body>
 </html>
